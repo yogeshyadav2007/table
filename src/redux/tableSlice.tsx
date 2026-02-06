@@ -36,7 +36,7 @@ const TABLE_ROWS = [
     {
         "Invoice Number": "INV-007", "Smart Property": "Gardenview Villas", "Smart Property City": "Austin",
         "Opportunity Name": "David Wilson", "Opportunity Owner": "Mia Anderson", "Total Commission": 1400,
-        "Days Past Due": 3, "Move In Date": "2024-03-05", "Application Date": "2024-01-30",
+        "Days Past Due": 0, "Move In Date": "2024-03-05", "Application Date": "2024-01-30",
         "AR Owner": "Sophia Martinez", "Accounts Receivable Stage": "Completed", "AR Last Modified Date": "2024-02-20"
     },
     {
@@ -113,24 +113,21 @@ const tableSlice = createSlice({
         },
 
         addInvoice(state, action) {
-        state.data.push(action.payload);
-
-        if (!state.dataBackup.find(row => row["Invoice Number"] === action.payload["Invoice Number"])) {
+            state.data.push(action.payload);
             state.dataBackup.push(action.payload);
-        }
+        },
 
         editInvoice(state, action) {
             const update = (TABLE_ROWS: any[]) => {
-                const index = TABLE_ROWS.findIndex((
-                    row: { [x: string]: any; }) => row["Invoice Number"] === action.payload["Invoice Number"]
-                    );
-                    if (index !== -1) {
+                const index = TABLE_ROWS.findIndex(row => row["Invoice Number"] === action.payload["Invoice Number"]);
+                if (index !== -1) {
                     TABLE_ROWS[index] = action.payload;
                     }
                 };
             update(state.data);
+            update(state.dataBackup);
             update(TABLE_ROWS);
-            }
+        }
     },
 });
 
