@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-
+// Raw Table data
 const TABLE_ROWS = [
     { "Invoice Number": "INV-001", "Smart Property": "Sunset Villas", "Smart Property City": "Los Angeles", 
       "Opportunity Name": "John Doe", "Opportunity Owner": "Alice Smith", "Total Commission": 1200, 
@@ -70,23 +70,26 @@ const TABLE_ROWS = [
     }
 ];
 
+// Initial state of the table
 const initialState: { data: any[]; dataBackup: any[] } = {
     data: [...TABLE_ROWS],
     dataBackup: [...TABLE_ROWS],
 };
 
+// Table slice
 const tableSlice = createSlice({
     name: 'Table',
     initialState,
     reducers: {
+        // Reducer to filter the table data based on search term
         getData(state, action) {
             const searchTerm = action.payload.toLowerCase();
-            const filteredData = state.dataBackup.filter(row => {
+            state.data = state.dataBackup.filter(row => {
                 return row["Invoice Number"].toLowerCase().includes(searchTerm);
             });
-            state.data = filteredData;
             },
 
+        // Reducer to filter the table data based on Accounts Receivable Stage
         getDataByFilter(state, action) {
             const filterTerm = action.payload.toLowerCase();
             const filteredData = state.dataBackup.filter(row => {
@@ -95,6 +98,7 @@ const tableSlice = createSlice({
             state.data = filteredData;
         },    
 
+        // Reducer to sort the table data based on column
         sortData(state, action) {
             const prevData = [...state.data];
             const column = action.payload;
@@ -108,15 +112,18 @@ const tableSlice = createSlice({
             }
         },
         
+        // Reducer to reset the table data to its original state
         resetData(state) {
             state.data = [...state.dataBackup];
         },
 
+        // Reducer to add a new invoice
         addInvoice(state, action) {
             state.data.push(action.payload);
             state.dataBackup.push(action.payload);
         },
 
+        // Reducer to edit an existing invoice
         editInvoice(state, action) {
             const update = (TABLE_ROWS: any[]) => {
                 const index = TABLE_ROWS.findIndex(row => row["Invoice Number"] === action.payload["Invoice Number"]);

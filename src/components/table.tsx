@@ -8,12 +8,14 @@ import { Card, CardHeader, Input, Typography, Button, CardBody, CardFooter, Chip
 import { useEffect, useReducer } from "react";
 import { useDispatch, useSelector } from 'react-redux';
 
+
 const TABS = [
   { label: "All", value: "all" },
   { label: "Pending", value: "pending" },
   { label: "Completed", value: "completed" },
 ];
 
+// Table head
 const TABLE_HEAD = [
   "Invoice Number",
   "Smart Property",
@@ -30,6 +32,7 @@ const TABLE_HEAD = [
   "",
 ] as const;
 
+// Table state
 type InvoiceTableState = {
   tabValue: string;
   searchValue: string;
@@ -40,6 +43,7 @@ type InvoiceTableState = {
   selectedInvoice: any | null;
 };
 
+// Initial state
 const initialState: InvoiceTableState = {
   tabValue: "all",
   searchValue: "",
@@ -50,6 +54,7 @@ const initialState: InvoiceTableState = {
   selectedInvoice: null,
 };
 
+// Action types
 type Action =
   | { type: "SET_TAB"; payload: string }
   | { type: "SET_SEARCH"; payload: string }
@@ -59,21 +64,27 @@ type Action =
   | { type: "OPEN_EDIT_MODAL"; payload: any }
   | { type: "CLOSE_MODAL" };
 
+// Reducer
 function invoiceTableReducer( state: InvoiceTableState, action: Action ): 
   InvoiceTableState {
     switch (action.type) {
+      // Update Tab
       case "SET_TAB":
         return { ...state, tabValue: action.payload, currentPage: 1 };
 
+      // Update Search Bar
       case "SET_SEARCH":
         return { ...state, searchValue: action.payload, currentPage: 1 };
 
+      // Update Page
       case "SET_PAGE":
         return { ...state, currentPage: action.payload };
 
+      // Update Rows Per Page
       case "SET_ROWS_PER_PAGE":
         return { ...state, rowsPerPage: action.payload, currentPage: 1 };
 
+      // Open Add Invoice Form Modal
       case "OPEN_ADD_MODAL":
         return {
           ...state,
@@ -82,6 +93,7 @@ function invoiceTableReducer( state: InvoiceTableState, action: Action ):
           isModalOpen: true,
         };
 
+      // Open Edit Invoice Form Modal
       case "OPEN_EDIT_MODAL":
         return {
           ...state,
@@ -90,6 +102,7 @@ function invoiceTableReducer( state: InvoiceTableState, action: Action ):
           isModalOpen: true,
         };
 
+      // Close Invoice Form Modal
       case "CLOSE_MODAL":
         return { ...state, isModalOpen: false };
 
@@ -105,16 +118,18 @@ export function InvoiceTable() {
     invoiceTableReducer,
     initialState
   );
-  const { tabValue, searchValue, currentPage, rowsPerPage, isModalOpen, mode, selectedInvoice } = state;
-  const totalPages = Math.max(1, Math.ceil(TABLE_ROWS.length / rowsPerPage));
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = startIndex + rowsPerPage;
-  const paginatedRows = TABLE_ROWS.slice(startIndex, endIndex);
+  const { tabValue, searchValue, currentPage, rowsPerPage, isModalOpen, mode, selectedInvoice } = state;  // Destructure state
+  const totalPages = Math.max(1, Math.ceil(TABLE_ROWS.length / rowsPerPage)); // Calculate total pages
+  const startIndex = (currentPage - 1) * rowsPerPage; // Calculate start index
+  const endIndex = startIndex + rowsPerPage;  // Calculate end index
+  const paginatedRows = TABLE_ROWS.slice(startIndex, endIndex); // Get paginated rows
 
+  // Set page to 1 when TABLE_ROWS changes
   useEffect(() => {
     dispatchLocal({ type: "SET_PAGE", payload: 1 });
   }, [TABLE_ROWS]);
 
+  // Set page to 1 when tabValue changes or tabValue is "all" and TABLE_ROWS changes according to tabValue
   useEffect(() => {
     dispatchLocal({ type: "SET_SEARCH", payload: "" });
     dispatchLocal({ type: "SET_PAGE", payload: 1 });
@@ -126,6 +141,7 @@ export function InvoiceTable() {
     }
   }, [tabValue, dispatch]);
   
+  // Set page to 1 when searchValue changes or tabValue is "all" and TABLE_ROWS changes according to searchValue
   useEffect(() => {
     if (searchValue !== "") {
       dispatch(getData(searchValue));
@@ -134,38 +150,46 @@ export function InvoiceTable() {
     }
   }, [searchValue, tabValue, dispatch]);
 
+  // Handle view all button click 
   const handleViewAll = () => {
     dispatch(resetData());
     dispatchLocal({ type: "SET_SEARCH", payload: "" });
     dispatchLocal({ type: "SET_TAB", payload: "all" });
   };
 
+  // Handle tab change
   const handleTabChange = (value: string) => {
     dispatchLocal({ type: "SET_SEARCH", payload: "" });
     dispatchLocal({ type: "SET_TAB", payload: value });
   };
 
+  // Handle search change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatchLocal({ type: "SET_SEARCH", payload: e.target.value });
     dispatchLocal({ type: "SET_TAB", payload: "all" });
   };
 
+  // Handle open add invoice modal
   const handleOpenAddModal = () => {
     dispatchLocal({ type: "OPEN_ADD_MODAL" });
   };
 
+  // Handle sort
   const handleSort = (head: string) => {
     dispatch(sortData(head));
   };
 
+  // Handle open edit invoice modal
   const handleOpenEditModal = (row: any) => {
     dispatchLocal({ type: "OPEN_EDIT_MODAL", payload: row });
   };
 
+  // Handle close modal
   const handleCloseModal = () => {
     dispatchLocal({ type: "CLOSE_MODAL" });
   };
 
+  // Handle rows per page change
   const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     dispatchLocal({
       type: "SET_ROWS_PER_PAGE",
@@ -173,14 +197,17 @@ export function InvoiceTable() {
     });
   };
 
+  // Handle page change to previous
   const handlePreviousPage = () => {
     dispatchLocal({ type: "SET_PAGE", payload: currentPage - 1 });
   };
 
+  // Handle page change to next
   const handleNextPage = () => {
     dispatchLocal({ type: "SET_PAGE", payload: currentPage + 1 });
   };
 
+  // Handle submit invoice
   const handleSubmitInvoice = (data: any) => {
     if (mode === "add") {
       dispatch(addInvoice(data));
@@ -206,9 +233,11 @@ export function InvoiceTable() {
           </div>
           <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
             <Button variant="outlined" size="sm" onClick={ handleViewAll }>
+              {/* Button to view all invoices */}
               View All
             </Button>
             <Button className="flex items-center gap-3" size="sm" onClick={ handleOpenAddModal }>
+              {/* Button to add new invoice */}
               <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add Invoice
             </Button>
           </div>
@@ -223,6 +252,7 @@ export function InvoiceTable() {
                   value={value}
                   onClick={() => handleTabChange(String(value))}
                 >
+                  {/* Tabs to filter invoices by status */}
                   &nbsp;&nbsp;{label}&nbsp;&nbsp;
                 </Tab>
               ))}
@@ -230,6 +260,7 @@ export function InvoiceTable() {
           </Tabs>
 
           <div className="w-full md:w-72">
+            {/* Search bar */}
             <Input
               label="Search" id="search" value={searchValue}
               icon={<MagnifyingGlassIcon className="h-5 w-5" />} onChange={ handleSearchChange }/>
@@ -252,8 +283,10 @@ export function InvoiceTable() {
                       color="blue-gray"
                       className="flex items-center justify-between gap-2 font-normal leading-none opacity-70"
                     >
+                      {/* Table header */}
                       {head}{" "}
                       {index !== TABLE_HEAD.length - 1 && (
+                        // Sort icon
                         <ChevronUpDownIcon strokeWidth={2} className="h-4 w-4" onClick={() => handleSort(head)}/>
                       )}
                     </Typography>
@@ -341,6 +374,7 @@ export function InvoiceTable() {
                       </td>
                       <td className={classes}>
                         <Tooltip content="Edit Invoice">
+                          {/* Edit button */}
                           <IconButton variant="text" onClick={() => { handleOpenEditModal(row) }}>
                             <PencilIcon className="h-4 w-4" />
                           </IconButton>
@@ -357,17 +391,22 @@ export function InvoiceTable() {
 
       <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4">
           <Typography variant="small" color="blue-gray" className="font-normal">
+            {/* Pagination info and total rows count */}
             Page {currentPage} of {totalPages} • {TABLE_ROWS.length} total rows
           </Typography>
 
           <div className="flex items-center gap-2">
-            <Typography variant="small">Rows per page:</Typography>
+            <Typography variant="small">
+              {/* Rows per page select menu */}
+              Rows per page:
+            </Typography>
 
             <select
-              className="border rounded p-1"
+              className=" w-20 bg-white bg-100 border rounded-md px-3 py-2 text-blue-gray-700 focus:outline-none focus:ring-1 transition border-blue-gray-200 focus:border-black focus:ring-black"
               value={rowsPerPage}
               onChange={ handleRowsPerPageChange }
             >
+              {/* Options for rows per page */}
               <option value={10}>10</option>
               <option value={25}>25</option>
               <option value={50}>50</option>
@@ -381,6 +420,7 @@ export function InvoiceTable() {
               disabled={currentPage === 1}
               onClick={ handlePreviousPage }
             >
+              {/* Previous button */}
               Previous
             </Button>
 
@@ -390,6 +430,7 @@ export function InvoiceTable() {
               disabled={currentPage === totalPages}
               onClick={ handleNextPage }
             >
+              {/* Next button */}
               Next
             </Button>
           </div>
